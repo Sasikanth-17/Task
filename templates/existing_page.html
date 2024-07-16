@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input and Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Center the container on the page */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Background video style */
+        #background_video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover; /* Fill the container without leaving spaces */
+        }
+
+        /* Glassy card style */
+        .card {
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.2); /* Transparent white background */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Slight glow effect */
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px) saturate(150%);
+        }
+
+        /* Input and button styles */
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #user_input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #generate_button {
+            padding: 10px 20px;
+            background-color: #ff6347; /* Different color for the button */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+ label {
+            font-family: 'Poppins', sans-serif; /* Apply the custom font */
+            font-size: 20px; /* Adjust the font size as needed */
+            color: transparent; /* Make the text transparent to show the gradient */
+            background-image: linear-gradient(45deg, #007bff, #ffffff); /* Gradient background color */
+            -webkit-background-clip: text; /* Apply the gradient to the text */
+            background-clip: text; /* Apply the gradient to the text */
+        }
+
+        /* Output image style */
+        #output_area img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        /* Loading animation */
+        #loading_bar {
+            width: 100%;
+            height: 5px;
+            background-color: #f0f0f0; /* Change the background color */
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none; /* Initially hidden */
+        }
+
+        /* Loading bar progress */
+        #loading_progress {
+            height: 100%;
+            width: 0;
+            background-color: #007bff; /* Change the transition color */
+            border-radius: 5px;
+            transition: width 0.5s; /* Smooth transition for width change */
+            animation: loadingAnimation 1s linear infinite; /* Add the animation */
+        }
+
+        /* Loading bar animation */
+     @keyframes loadingAnimation {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        /* Apply the animation to the loading bar */
+        #loading_progress {
+            height: 100%;
+            width: 0;
+            background-color:#50459b; /* Change the transition color */
+            border-radius: 5px;
+            transition: width 1s; /* Smooth transition for width change */
+            animation: loadingAnimation 10s linear infinite;
+        }
+ </style>
+</head>
+<body>
+    <!-- Background video -->
+    <iframe id="background_video" width="100%" height="100%" src="https://www.youtube.com/embed/URyiCGZNjdI?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&autohide=1&playlist=URyiCGZNjdI" frameborder="0" allowfullscreen></iframe>
+
+    <div class="container">
+        <div class="card">
+            <div class="input-container">
+                <label for="user_input">Enter your input:</label>
+                <input type="text" id="user_input" placeholder="Type your input here">
+                <button id="generate_button" onclick="generateOutput()">Generate Output</button>
+            </div>
+
+            <!-- Loading bar -->
+            <div id="loading_bar">
+                <div id="loading_progress"></div>
+            </div>
+
+            <div id="output_area"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateOutput() {
+                          var userInput = document.getElementById("user_input").value;
+
+            // Show the loading bar
+            var loadingBar = document.getElementById("loading_bar");
+            loadingBar.style.display = "block";
+
+            // Send the user input to Flask using AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/process_input", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.responseType = "blob"; // Set the response type to receive binary data as a Blob
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    // Hide the loading bar
+                    loadingBar.style.display = "none";
+
+                    if (xhr.status === 200) {
+                        // Convert the received Blob data to an image and display it
+                        var imageUrl = URL.createObjectURL(xhr.response);
+
+                        // Create an image element and set its source to the URL
+                        var imageElement = document.createElement("img");
+                        imageElement.src = imageUrl;
+
+                        // Clear previous content in the output area
+                        var outputArea = document.getElementById("output_area");
+                        while (outputArea.firstChild) {
+                            outputArea.removeChild(outputArea.firstChild);
+                        }
+
+                        // Append the new image element to the output_area div
+                        outputArea.appendChild(imageElement);
+                    } else {
+                        // Handle error if needed
+                        console.error("Error: " + xhr.responseText);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ input_text: userInput }));
+        
+
+        }
+    </script>
+</body>
+</html>
+
+
+
+
